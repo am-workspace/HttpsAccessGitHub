@@ -1,6 +1,6 @@
 # GitHub Connectivity Monitor
 
-一个轻量级的 Windows 托盘工具，每 5 分钟检测 GitHub 是否可达，在恢复可访问时弹出通知提醒。
+一个轻量级的 Windows 托盘工具，每 5 分钟检测 GitHub 是否可达，在恢复可访问时弹出通知提醒。最好搭配switchhosts，配置github520一起使用。
 
 ## 功能
 
