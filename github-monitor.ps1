@@ -1,4 +1,4 @@
-
+﻿
 # GitHub Connectivity Monitor (HTTPS real accessibility check)
 # Checks if github.com is actually reachable via HTTPS every 60 seconds.
 # Notifies only when GitHub transitions from inaccessible -> accessible.

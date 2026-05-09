@@ -17,8 +17,7 @@
 | 文件 | 用途 |
 |------|------|
 | `github-monitor.ps1` | 主脚本，核心逻辑 |
-| `start-monitor.bat` | 手动启动（有控制台窗口） |
-| `start-monitor.vbs` | 静默启动（无窗口，适合开机自启） |
+| `start-monitor.vbs` | 静默启动（双击即可运行，无窗口） |
 | `monitor.log` | 运行日志（自动清空前次记录） |
 | `GitHub_Invertocat_Black.png` | 托盘图标 |
 
@@ -26,7 +25,7 @@
 
 ### 手动运行
 
-双击 `start-monitor.bat`，会在托盘出现图标并开始监控。
+双击 `start-monitor.vbs`，托盘出现图标并开始监控。
 
 ### 开机自启
 
@@ -40,9 +39,7 @@
 ## 依赖
 
 - Windows 10 / 11
-- PowerShell 7+（`pwsh.exe`）
-
-> PowerShell 5.1（系统自带）可能因执行策略限制无法运行，推荐安装 [PowerShell 7](https://github.com/PowerShell/PowerShell)。
+- Windows PowerShell 5.1（系统自带，无需额外安装）
 
 ## 工作原理
 

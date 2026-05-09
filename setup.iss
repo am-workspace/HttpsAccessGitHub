@@ -38,7 +38,7 @@ Name: "{group}\卸载 {#MyAppName}"; Filename: "{uninstallexe}"
 
 ; 卸载前先关闭正在运行的程序
 [UninstallRun]
-Filename: "taskkill"; Parameters: "/f /im pwsh.exe /fi ""WINDOWTITLE eq GitHub Monitor*"""; Flags: runhidden
+Filename: "taskkill"; Parameters: "/f /im powershell.exe /fi ""WINDOWTITLE eq GitHub Monitor*"""; Flags: runhidden
 
 ; 清理运行时产生的文件 + 整个安装目录
 [UninstallDelete]
