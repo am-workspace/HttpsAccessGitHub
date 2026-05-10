@@ -6,8 +6,8 @@
 Add-Type -AssemblyName System.Windows.Forms
 
 $url = "https://github.com"
-$checkInterval = 300
-$cooldownAfterNotify = 600
+$checkInterval = 180
+$cooldownAfterNotify = 300
 $script:lastNotifyTime = 0
 $script:wasAccessible = $null
 $script:notifyIcon = $null
@@ -72,8 +72,19 @@ function Show-Notification {
 
 function Test-GitHubAccess {
     try {
-        $response = Invoke-WebRequest -Uri $url -Method Head -UseBasicParsing -TimeoutSec 10
-        return ($response.StatusCode -eq 200 -or $response.StatusCode -eq 301 -or $response.StatusCode -eq 302)
+        # Use GET (not HEAD) to fetch actual page body.
+        # HEAD-only checks can be fooled: GFW may hijack the TCP stream,
+        # return a fake 200 header, then block real data transfer.
+        # GET + content validation catches the "false 200" scenario.
+        $response = Invoke-WebRequest -Uri $url -Method Get -UseBasicParsing -TimeoutSec 10
+
+        # Real github.com homepage is tens of KB; fake/blocked responses are tiny or empty
+        if ($response.Content.Length -lt 500) {
+            return $false
+        }
+
+        # Verify the body actually contains GitHub content (not a block page or empty response)
+        return ($response.Content -match 'github\.com')
     } catch {
         return $false
     }
