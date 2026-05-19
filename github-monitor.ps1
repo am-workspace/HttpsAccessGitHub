@@ -72,20 +72,42 @@ function Show-Notification {
 
 function Test-GitHubAccess {
     try {
-        # Use GET (not HEAD) to fetch actual page body.
-        # HEAD-only checks can be fooled: GFW may hijack the TCP stream,
-        # return a fake 200 header, then block real data transfer.
-        # GET + content validation catches the "false 200" scenario.
-        $response = Invoke-WebRequest -Uri $url -Method Get -UseBasicParsing -TimeoutSec 10
+        # Rate-based detection: GFW often throttles connections to a crawl
+        # while still delivering headers — a "false 200". We require the
+        # actual page body to arrive at a reasonable speed.
+        #
+        # Threshold: 30 KB within 15 seconds → avg ≥ 2 KB/s.
+        # A throttled connection (hundreds of B/s) won't pass this gate.
 
-        # Real github.com homepage is tens of KB; fake/blocked responses are tiny or empty
-        if ($response.Content.Length -lt 500) {
+        $timeoutSec = 15
+        $minBytes = 30 * 1024
+
+        $sw = [System.Diagnostics.Stopwatch]::StartNew()
+        $response = Invoke-WebRequest -Uri $url -Method Get -UseBasicParsing -TimeoutSec $timeoutSec
+        $sw.Stop()
+
+        $size = $response.Content.Length
+        $elapsed = $sw.Elapsed.TotalSeconds
+
+        # 1. Content too small → throttled or fake response
+        if ($size -lt $minBytes) {
+            $kbps = [math]::Round($size / $elapsed / 1024, 1)
+            Write-Log "Speed check FAIL: ${size}B in $([math]::Round($elapsed,1))s = ${kbps}KB/s (< 2KB/s)"
             return $false
         }
 
-        # Verify the body actually contains GitHub content (not a block page or empty response)
-        return ($response.Content -match 'github\.com')
+        # 2. Body must contain real GitHub content (not a block page)
+        if ($response.Content -notmatch 'github\.com') {
+            Write-Log "Content validation FAIL: no github.com in body"
+            return $false
+        }
+
+        $kbps = [math]::Round($size / $elapsed / 1024, 1)
+        Write-Log "Speed OK: ${size}B in $([math]::Round($elapsed,1))s = ${kbps}KB/s"
+        return $true
+
     } catch {
+        Write-Log "Request failed: $_"
         return $false
     }
 }
